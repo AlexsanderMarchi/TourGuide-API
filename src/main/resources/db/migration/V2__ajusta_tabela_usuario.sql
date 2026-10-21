@@ -1,0 +1,3 @@
+ALTER TABLE usuario DROP INDEX senha;
+ALTER TABLE usuario MODIFY senha VARCHAR(255) NOT NULL;
+ALTER TABLE usuario ADD CONSTRAINT uk_usuario_nome UNIQUE (nome);
