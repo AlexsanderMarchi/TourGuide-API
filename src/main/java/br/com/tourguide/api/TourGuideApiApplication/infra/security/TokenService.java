@@ -10,6 +10,13 @@ import java.time.ZoneOffset;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/** Responsável por gerar os tokens JWT da API:
+ * <ul>
+ *   <li>Assina o token com HMAC256 usando o secret do application.properties;</li>
+ *   <li>Coloca o username do usuário como subject;</li>
+ *   <li>Define validade de 2 horas.</li>
+ * </ul>
+ */
 @Service
 public class TokenService {
 
