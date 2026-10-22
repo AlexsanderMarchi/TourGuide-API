@@ -1,6 +1,8 @@
 package br.com.tourguide.api.TourGuideApiApplication.controller;
 
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRecord;
+import br.com.tourguide.api.TourGuideApiApplication.infra.security.DadosTokenJWT;
+import br.com.tourguide.api.TourGuideApiApplication.infra.security.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,11 +17,16 @@ public class AutenticacaoController {
     @Autowired
     private AuthenticationManager manager;
 
+    @Autowired
+    private TokenService tokenService;
+
     @PostMapping
     public ResponseEntity efetuarLogin(@RequestBody UsuarioRecord dados) {
         var token = new UsernamePasswordAuthenticationToken(dados.username(), dados.password());
-        var authenticaon = manager.authenticate(token);
+        var authentication = manager.authenticate(token);
 
-        return ResponseEntity.ok().build();
+        var tokenJWT = tokenService.gerarToken((UsuarioRecord) authentication.getPrincipal());
+
+        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT));
     }
 }
