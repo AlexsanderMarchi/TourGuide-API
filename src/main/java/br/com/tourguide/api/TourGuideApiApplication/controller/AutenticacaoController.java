@@ -1,5 +1,6 @@
 package br.com.tourguide.api.TourGuideApiApplication.controller;
 
+import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioEntity;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRecord;
 import br.com.tourguide.api.TourGuideApiApplication.infra.security.DadosTokenJWT;
 import br.com.tourguide.api.TourGuideApiApplication.infra.security.TokenService;
@@ -42,8 +43,13 @@ public class AutenticacaoController {
         var token = new UsernamePasswordAuthenticationToken(dados.username(), dados.password());
         var authentication = manager.authenticate(token);
 
-        String tokenJWT = tokenService.gerarToken((UsuarioRecord) authentication.getPrincipal());
+        String tokenJWT = tokenService.gerarToken((UsuarioEntity) authentication.getPrincipal());
 
         return ResponseEntity.ok(new DadosTokenJWT(tokenJWT));
+    }
+
+    @GetMapping("/hello")
+    public String helloWorld(){
+        return "Hello world";
     }
 }
