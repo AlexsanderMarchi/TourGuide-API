@@ -8,8 +8,10 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class ConfigurationSecurity {
@@ -17,6 +19,9 @@ public class ConfigurationSecurity {
     /** Define as regras de segurança HTTP da API:
      * <ul>
      *   <li>Desabilita o CSRF (API REST, sem formulários);</li>
+     *   <li>Não cria sessão (STATELESS): cada requisição se autentica pelo token JWT, sem JSESSIONID;</li>
+     *   <li>Registra o SecurityFilter antes do UsernamePasswordAuthenticationFilter, para validar o token
+     *   JWT e autenticar o usuário antes de o Spring Security checar as regras de acesso;</li>
      *   <li>Libera sem autenticação apenas o login e o /error;</li>
      *   <li>Exige autenticação nas demais rotas;</li>
      *   <li>Configura o logout em /api/auth/logout retornando 200;</li>
@@ -24,9 +29,11 @@ public class ConfigurationSecurity {
      * </ul>
      */
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityFilter securityFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/error").permitAll()
                         .anyRequest().authenticated())
