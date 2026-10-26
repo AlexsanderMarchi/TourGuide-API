@@ -1,6 +1,5 @@
 package br.com.tourguide.api.TourGuideApiApplication.controller;
 
-import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.DadosAlteracaoSenha;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioEntity;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRecord;
 import br.com.tourguide.api.TourGuideApiApplication.infra.security.DadosTokenJWT;
