@@ -37,7 +37,7 @@ public class ConfigurationSecurity {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/error").permitAll()
+                        .requestMatchers("/api/auth/login", "/error", "/esqueci-senha").permitAll()
                         .anyRequest().authenticated())
 //                .formLogin(form -> form // Forma para nao precisar criar controller. Hoje tem o AutenticacaoController
 //                        .loginProcessingUrl("/api/auth/login")

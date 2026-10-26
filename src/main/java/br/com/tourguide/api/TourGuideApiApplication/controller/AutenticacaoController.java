@@ -1,5 +1,6 @@
 package br.com.tourguide.api.TourGuideApiApplication.controller;
 
+import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.DadosAlteracaoSenha;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioEntity;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRecord;
 import br.com.tourguide.api.TourGuideApiApplication.infra.security.DadosTokenJWT;
@@ -48,8 +49,5 @@ public class AutenticacaoController {
         return ResponseEntity.ok(new DadosTokenJWT(tokenJWT));
     }
 
-    @GetMapping("/hello")
-    public String helloWorld(){
-        return "Hello world";
-    }
+    // todo add template de PR, add tratamento de erro para 403 e outros
 }

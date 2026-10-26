@@ -42,4 +42,8 @@ public class UsuarioEntity implements UserDetails {
     public String getUsername() {
         return nome;
     }
+
+    public void alterarSenha(String senhaCriptografada) {
+        this.senha = senhaCriptografada;
+    }
 }
