@@ -3,6 +3,9 @@ package br.com.tourguide.api.TourGuideApiApplication.domain.usuario;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO do modulo de usuarios. Sem vinculo com autenticação.
+ */
 @Data
 @NoArgsConstructor
 public class UsuarioResponseDTO {

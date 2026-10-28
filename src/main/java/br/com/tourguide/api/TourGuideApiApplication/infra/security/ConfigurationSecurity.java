@@ -24,7 +24,7 @@ public class ConfigurationSecurity {
      *   <li>Não cria sessão (STATELESS): cada requisição se autentica pelo token JWT, sem JSESSIONID;</li>
      *   <li>Registra o SecurityFilter antes do UsernamePasswordAuthenticationFilter, para validar o token
      *   JWT e autenticar o usuário antes de o Spring Security checar as regras de acesso;</li>
-     *   <li>Libera sem autenticação apenas o login e o /error;</li>
+     *   <li>Libera sem autenticação apenas o login, o /error, o fluxo de esqueci minha senha e o Swagger;</li>
      *   <li>Exige autenticação nas demais rotas;</li>
      *   <li>Configura o logout em /api/auth/logout retornando 200;</li>
      *   <li>Faz requisições não autenticadas receberem 401 em vez de redirecionar para uma página de login.</li>
@@ -37,7 +37,9 @@ public class ConfigurationSecurity {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/error").permitAll()
+                        .requestMatchers("/api/auth/login", "/error",
+                                "/api/usuario/esqueci-minha-senha", "/api/usuario/recuperar-senha").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated())
 //                .formLogin(form -> form // Forma para nao precisar criar controller. Hoje tem o AutenticacaoController
 //                        .loginProcessingUrl("/api/auth/login")

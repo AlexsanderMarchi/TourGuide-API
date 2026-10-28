@@ -48,8 +48,5 @@ public class AutenticacaoController {
         return ResponseEntity.ok(new DadosTokenJWT(tokenJWT));
     }
 
-    @GetMapping("/hello")
-    public String helloWorld(){
-        return "Hello world";
-    }
+    //todo melhorar pr template add tratamento de erro para 403 e outros. Testar email em recuperar senha, melhorar swagger
 }
