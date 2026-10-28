@@ -26,12 +26,25 @@ functionality required by the frontend.
 
 ---
 
-## ⚙️ Como funciona
+### ⚙️ How it works
 
-### Autenticação (JWT, stateless)
+#### Autenticação (JWT, stateless)
 
-1. O cliente ...
-2.
+##### Login
+
+1. We defined a configuration class where we customize Spring Security interfaces. In it, we configure the
+   `SecurityFilterChain`, `AuthenticationManager` and `PasswordEncoder`. In the SecurityFilterChain, we define the main
+   security configurations, such as setting the session policy to STATELESS, CSRF, the endpoints allowed without
+   authentication, and the endpoints that require authentication. The AuthenticationManager is used to look up user
+   credentials in the database and compare them with the ones sent to the endpoint. The PasswordEncoder is required to
+   define how passwords are encoded (if we mock a user credential, the password must be prefixed with `{noop}`).
+2. We will use a database to store the users, so we created `UsuarioEntity` implementing `UserDetails` (the Spring
+      Security interface for authentication). We also created `UsuarioRepository` and `UsuarioService` to work with JPA.
+      In UsuarioService, we implement the Spring Security interface `UserDetailsService`, which provides the method
+      Spring uses to load users during login: `loadUserByUsername`.
+3. There is the controller `AutenticacaoController` for the login. There we call AuthenticationManager to authenticate
+   the credentials. After this, we create a jwt token in `TokenService` method, where it will return user data and
+   expire date...
 
 A API não guarda sessão (`STATELESS`): cada requisição se autentica só pelo token.
 

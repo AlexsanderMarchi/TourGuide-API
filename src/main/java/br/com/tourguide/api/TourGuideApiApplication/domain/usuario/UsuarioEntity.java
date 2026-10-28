@@ -26,7 +26,9 @@ public class UsuarioEntity implements UserDetails {
     private String email;
 
     /** Token enviado por email no "esqueci minha senha". Fica nulo quando não há recuperação em andamento */
+    @Column(name = "recuperacao_token_senha")
     private String tokenRecuperacao;
+    @Column(name = "expiracao_token_senha")
     private LocalDateTime expiracaoToken;
 
     /** Linkagem de tabela perfil ao usuario. ManyToOne pq é muitos usuarios para um perfil */
