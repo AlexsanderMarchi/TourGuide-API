@@ -36,6 +36,16 @@ public class UsuarioEntity implements UserDetails {
     @JoinColumn(name = "perfil", nullable = false)
     private PerfilEntity perfil;
 
+    /** Construtor vazio exigido pelo JPA */
+    protected UsuarioEntity() {
+    }
+
+    public UsuarioEntity(String nome, String senha, PerfilEntity perfil) {
+        this.nome = nome;
+        this.senha = senha;
+        this.perfil = perfil;
+    }
+
     /** O prefixo "ROLE_" permite usar perfil como @PreAuthorize */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
