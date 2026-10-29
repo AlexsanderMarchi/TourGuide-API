@@ -4,6 +4,7 @@ import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioEntity
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRecord;
 import br.com.tourguide.api.TourGuideApiApplication.infra.security.DadosTokenJWT;
 import br.com.tourguide.api.TourGuideApiApplication.infra.security.TokenService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,12 +15,10 @@ import org.springframework.web.bind.annotation.*;
 // Todo usar redis para salvar a senha
 @RestController
 @RequestMapping("api/auth/login")
+@RequiredArgsConstructor
 public class AutenticacaoController {
 
-    @Autowired
     private AuthenticationManager manager;
-
-    @Autowired
     private TokenService tokenService;
 
     /** Realiza o login do usuário e devolve um token JWT:
@@ -48,5 +47,5 @@ public class AutenticacaoController {
         return ResponseEntity.ok(new DadosTokenJWT(tokenJWT));
     }
 
-    //todo melhorar pr template add tratamento de erro para 403 e outros. Testar email em recuperar senha, melhorar swagger
+    //todo melhorar pr template add tratamento de erro para 403 e outros. Testar email em recuperar senha, melhorar swagger. Criar testes. remover autowired como foi feito aqui
 }
