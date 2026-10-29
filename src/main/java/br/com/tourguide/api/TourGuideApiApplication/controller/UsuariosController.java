@@ -7,6 +7,7 @@ import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioEntity
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRepository;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioResponseDTO;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;

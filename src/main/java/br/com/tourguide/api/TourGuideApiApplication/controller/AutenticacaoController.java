@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.*;
 // Todo usar redis para salvar a senha
 @RestController
 @RequestMapping("api/auth/login")
-@RequiredArgsConstructor
 public class AutenticacaoController {
 
+    @Autowired
     private AuthenticationManager manager;
+
+    @Autowired
     private TokenService tokenService;
 
     /** Realiza o login do usuário e devolve um token JWT:

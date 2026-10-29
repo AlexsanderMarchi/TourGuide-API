@@ -8,7 +8,8 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** Configuração do Swagger (springdoc):
+/**
+ * Configuração do Swagger (springdoc):
  * <ul>
  *   <li>O springdoc lê os controllers e gera a documentação OpenAPI em /v3/api-docs;</li>
  *   <li>A tela do Swagger fica em /swagger-ui.html;</li>
@@ -19,18 +20,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SpringDocConfiguration {
 
-    @Bean
-    public OpenAPI customOpenAPI() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("Tour.Guide API")
-                        .description("API REST do Tour.Guide")
-                        .version("v1"))
-                .components(new Components()
-                        .addSecuritySchemes("bearer-key", new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT")))
-                .addSecurityItem(new SecurityRequirement().addList("bearer-key"));
-    }
+  @Bean
+  public OpenAPI customOpenAPI() {
+    return new OpenAPI()
+        .info(new Info()
+            .title("Tour Guide API")
+            .description("API REST do Tour Guide")
+            .version("v1"))
+        .components(new Components()
+            .addSecuritySchemes("bearer-key", new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT")))
+        .addSecurityItem(new SecurityRequirement().addList("bearer-key"));
+  }
 }
