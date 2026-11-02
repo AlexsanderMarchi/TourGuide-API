@@ -49,7 +49,7 @@ functionality required by the frontend.
    request. The TokenService uses Auth0’s JWT library and has two methods: one to generate the token and another to
    validate it.
 
-##### Requests persistence
+##### Requests validation and persistence
 
 1. After login, we need to persist the authentication in subsequent requests. To do that, we store the token on the
    frontend and send it with every request. On the API side, this validation is handled by a filter, which intercepts
@@ -58,7 +58,10 @@ functionality required by the frontend.
    method in the SecurityFilterChain.
 2. SecurityFilter uses the validation method from TokenService. If the request doesn’t have a token, the filter simply
    passes it along the chain, and Spring handles it through the rules defined in `authorizeHttpRequests` method.
-3. REFRESH TOKEN...
+3. To persist token validation, we use a refresh token that is returned at login along with the access token. Both are
+   stored on the front end, but the refresh token is only used when the access token expires. When this happens, the
+   refresh token, which has a longer expiration time (2 hours), is validated, and the endpoint returns a new access
+   token and refresh token.
 
 ### Profiles and Authorization
 
@@ -75,11 +78,14 @@ functionality required by the frontend.
 
 ## 📡 Endpoints
 
-| Método | Rota                 | Autenticação | Descrição                         |
-|--------|----------------------|--------------|-----------------------------------|
-| `POST` | `/api/auth/login`    | Pública      | Faz o login e retorna o JWT       |
-| `POST` | `/api/auth/logout`   | Autenticada  | Logout                            |
-| `GET`  | `/api/usuario/lista` | `ADMIN`      | Lista os usuários com seus perfis |
+| Método | Rota                               | Autenticação | Descrição                                                    |
+|--------|------------------------------------|--------------|--------------------------------------------------------------|
+| `POST` | `/api/auth/login`                  | Pública      | Faz o login e retorna o JWT e o refresh token                |
+| `POST` | `/api/auth/login/atualizar-token`  | Pública      | Recebe o refresh token e retorna um novo JWT e refresh token |
+| `GET`  | `/api/usuario/lista`               | `ADMIN`      | Lista os usuários com seus perfis                            |
+| `POST` | `/api/usuario/alterar-senha`       | Autenticada  | Altera a senha do usuário logado                             |
+| `POST` | `/api/usuario/esqueci-minha-senha` | Pública      | Envia por email o token de recuperação de senha              |
+| `POST` | `/api/usuario/recuperar-senha`     | Pública      | Redefine a senha usando o token recebido por email           |
 
 ## 🗄️ Banco de dados
 

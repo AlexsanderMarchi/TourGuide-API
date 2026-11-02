@@ -12,9 +12,11 @@ public class UsuarioResponseDTO {
 
     private String nome;
     private String perfil;
+    private String email;
 
     public UsuarioResponseDTO(UsuarioEntity usuario) {
-        this.nome = usuario.getUsername();
+        this.nome = usuario.getNome();
         this.perfil = usuario.getPerfil().getNome();
+        this.email = usuario.getEmail();
     }
 }

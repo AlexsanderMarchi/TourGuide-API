@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name="usuario")
+@Table(name = "usuario")
 @Getter
 public class UsuarioEntity implements UserDetails {
 
@@ -22,31 +22,45 @@ public class UsuarioEntity implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nome;
-    private  String senha;
+    private String senha;
     private String email;
 
-    /** Token enviado por email no "esqueci minha senha". Fica nulo quando não há recuperação em andamento */
-    @Column(name = "recuperacao_token_senha")
-    private String tokenRecuperacao;
-    @Column(name = "expiracao_token_senha")
-    private LocalDateTime expiracaoToken;
-
-    /** Linkagem de tabela perfil ao usuario. ManyToOne pq é muitos usuarios para um perfil */
+    /**
+     * Linkagem de tabela perfil ao usuario. ManyToOne pq é muitos usuarios para um perfil
+     */
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "perfil", nullable = false)
     private PerfilEntity perfil;
 
-    /** Construtor vazio exigido pelo JPA */
+    /**
+     * Token enviado por email no "esqueci minha senha". Fica nulo quando não há recuperação em andamento
+     */
+    @Column(name = "recuperacao_token_senha")
+    private String tokenRecuperacao;
+
+    /**
+     * Todo ver pra que isso serve
+     */
+    @Column(name = "expiracao_token_senha")
+    private LocalDateTime expiracaoToken;
+
+
+    /**
+     * Construtor vazio exigido pelo JPA
+     */
     protected UsuarioEntity() {
     }
 
-    public UsuarioEntity(String nome, String senha, PerfilEntity perfil) {
+    public UsuarioEntity(String nome, String senha, String email, PerfilEntity perfil) {
         this.nome = nome;
         this.senha = senha;
+        this.email = email;
         this.perfil = perfil;
     }
 
-    /** O prefixo "ROLE_" permite usar perfil como @PreAuthorize */
+    /**
+     * O prefixo "ROLE_" permite usar perfil como @PreAuthorize
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + perfil.getNome()));
@@ -59,9 +73,10 @@ public class UsuarioEntity implements UserDetails {
 
     @Override
     public String getUsername() {
-        return nome;
+        return email;
     }
 
+    // methodos ligado a mudança de senha:
     public void alterarSenha(String senhaCriptografada) {
         this.senha = senhaCriptografada;
         // Senha trocada invalida qualquer link de recuperação pendente

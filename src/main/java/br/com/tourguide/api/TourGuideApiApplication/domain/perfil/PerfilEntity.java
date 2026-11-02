@@ -8,8 +8,15 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entidade de perfis. Hoje temos dois perfis:
+ *  <ul>
+ *      <li>USUARIO - Acesso limitado</li>
+ *      <li>ADMIN - Com acesso a tudo</li>
+ *  </ul>
+ */
 @Entity
-@Table(name="perfil")
+@Table(name = "perfil")
 @Getter
 @NoArgsConstructor
 public class PerfilEntity {

@@ -41,13 +41,10 @@ public class ConfigurationSecurity {
                                 "/api/usuario/esqueci-minha-senha", "/api/usuario/recuperar-senha").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated())
-//                .formLogin(form -> form // Forma para nao precisar criar controller. Hoje tem o AutenticacaoController
+//                .formLogin(form -> form // Forma para ter rotas sem precisar criar controller. Hoje tem o AutenticacaoController
 //                        .loginProcessingUrl("/api/auth/login")
 //                        .successHandler((req, res, a) -> res.setStatus(200))
 //                        .failureHandler((req, res, e) -> res.setStatus(401)))
-                .logout(logout -> logout
-                        .logoutUrl("/api/auth/logout")
-                        .logoutSuccessHandler((req, res, a) -> res.setStatus(200)))
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
         return http.build();
@@ -58,7 +55,7 @@ public class ConfigurationSecurity {
      usado para autenticar manualmente o usuário no login.
     */
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) {
         return configuration.getAuthenticationManager();
     }
 

@@ -1,13 +1,12 @@
 package br.com.tourguide.api.TourGuideApiApplication.controller;
 
-import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.DadosAlteracaoSenha;
-import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.DadosEsqueciSenha;
-import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.DadosRecuperacaoSenha;
+import br.com.tourguide.api.TourGuideApiApplication.domain.senha.DadosAlteracaoSenha;
+import br.com.tourguide.api.TourGuideApiApplication.domain.senha.DadosEsqueciSenha;
+import br.com.tourguide.api.TourGuideApiApplication.domain.senha.DadosRecuperacaoSenha;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioEntity;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRepository;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioResponseDTO;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +31,7 @@ public class UsuariosController {
     @GetMapping("/lista")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UsuarioResponseDTO>> buscarUsuarios() {
-        return ResponseEntity.ok(usuarioRepository.findAll().stream() //findAll ja é mét_odo padrao do JPA.
+        return ResponseEntity.ok(usuarioRepository.findAll().stream() //findAll ja é méthodo padrao do JPA.
                 .map(UsuarioResponseDTO::new)
                 .toList());
     }
@@ -43,14 +42,14 @@ public class UsuariosController {
         return ResponseEntity.noContent().build();
     }
 
-    /** Endpoint para enviar o email. Sempre retorna 202, exista o email ou não, para não revelar quem está cadastrado */
+    /** Etapa 1 do Esqueci Senha: endpoint para enviar o email. Sempre retorna 202, exista o email ou não, para não revelar quem está cadastrado */
     @PostMapping("/esqueci-minha-senha")
     public ResponseEntity<Void> esqueciMinhaSenha(@RequestBody @Valid DadosEsqueciSenha dados){
         usuarioService.enviarTokenRecuperacao(dados);
         return ResponseEntity.accepted().build();
     }
 
-    /** usada no email para realmente recuperar a senha */
+    /** Etapa 2 do Esqueci Senha: endpoint usada ao clicar no email recebido para realmente recuperar a senha */
     @PostMapping("/recuperar-senha")
     public ResponseEntity<Void> recuperarSenha(@RequestBody @Valid DadosRecuperacaoSenha dados){
         usuarioService.recuperarSenha(dados);

@@ -26,6 +26,7 @@ public class TokenService {
   @Value("${api.security.token.secret}")
   private String secret;
 
+  /** Gera o Access token, que dura 30 minutos*/
   public String gerarToken(UsuarioEntity usuario) {
     try {
       var algoritmo = Algorithm.HMAC256(secret);
@@ -33,7 +34,7 @@ public class TokenService {
           .withIssuer("API Tour.Guide")
           .withSubject(usuario.getUsername())
           .withClaim("tipo", "access")
-          .withExpiresAt(dataExpiracao())
+          .withExpiresAt(dataExpiracaoAccessToken())
           .sign(algoritmo);
 
     } catch (JWTCreationException exception) {
@@ -42,6 +43,7 @@ public class TokenService {
   }
 
   // tem um problema que nao é pego o tratamento de erro pelo SecurityFilter. Todo ver oq fazer
+  /** Gera o Refresh token, que dura 2 horas*/
   public String gerarRefreshToken(UsuarioEntity usuario) {
     try {
       var algoritmo = Algorithm.HMAC256(secret);
@@ -49,7 +51,7 @@ public class TokenService {
               .withIssuer("API Tour.Guide")
               .withSubject(usuario.getEmail())
               .withClaim("tipo", "refresh")
-              .withExpiresAt(dataExpiracaoRefresh())
+              .withExpiresAt(dataExpiracaoRefreshToken())
               .sign(algoritmo);
 
     } catch (JWTCreationException exception) {
@@ -57,7 +59,7 @@ public class TokenService {
     }
   }
 
-
+  /** Valida o Access token, retornando o username do usuario*/
   public String getUsuarioFromTokenJWT(String tokenJWT) {
     try {
       var algoritmo = Algorithm.HMAC256(secret);
@@ -72,7 +74,9 @@ public class TokenService {
     }
   }
 
-  // Lança JWTVerificationException se o refresh token for inválido/expirado (tratada como 401 no ErrorsValidation)
+  /** Valida o Refresh token, retornando o email do usuario;
+   * Lança JWTVerificationException se o refresh token for inválido/expirado (tratada como 401 no ErrorsValidation)
+   */
   public String getUsuarioFromRefreshToken(String refreshTokenJWT) {
     var algoritmo = Algorithm.HMAC256(secret);
     return JWT.require(algoritmo)
@@ -83,11 +87,11 @@ public class TokenService {
             .getSubject();
   }
 
-  private Instant dataExpiracao() {
+  private Instant dataExpiracaoAccessToken() {
     return LocalDateTime.now().plusMinutes(30).toInstant(ZoneOffset.of("-03:00"));
   }
 
-  private Instant dataExpiracaoRefresh() {
+  private Instant dataExpiracaoRefreshToken() {
     return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
   }
 

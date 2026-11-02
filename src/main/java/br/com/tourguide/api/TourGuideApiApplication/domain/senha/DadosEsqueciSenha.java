@@ -1,4 +1,4 @@
-package br.com.tourguide.api.TourGuideApiApplication.domain.usuario;
+package br.com.tourguide.api.TourGuideApiApplication.domain.senha;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
