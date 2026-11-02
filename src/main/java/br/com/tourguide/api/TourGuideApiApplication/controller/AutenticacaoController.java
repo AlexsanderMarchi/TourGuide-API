@@ -1,10 +1,12 @@
 package br.com.tourguide.api.TourGuideApiApplication.controller;
 
+import br.com.tourguide.api.TourGuideApiApplication.domain.autenticacao.DadosRefreshTokenJWT;
+import br.com.tourguide.api.TourGuideApiApplication.domain.autenticacao.DadosTokenJWT;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioEntity;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRecord;
-import br.com.tourguide.api.TourGuideApiApplication.infra.security.DadosTokenJWT;
+import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRepository;
 import br.com.tourguide.api.TourGuideApiApplication.infra.security.TokenService;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +24,9 @@ public class AutenticacaoController {
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     /** Realiza o login do usuário e devolve um token JWT:
      * <ul>
@@ -45,9 +50,30 @@ public class AutenticacaoController {
         var authentication = manager.authenticate(token);
 
         String tokenJWT = tokenService.gerarToken((UsuarioEntity) authentication.getPrincipal());
+        String refreshTokenJWT = tokenService.gerarRefreshToken((UsuarioEntity) authentication.getPrincipal());
 
-        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT));
+        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT));
     }
 
-    //todo melhorar pr template add tratamento de erro para 403 e outros. Testar email em recuperar senha, melhorar swagger. Criar testes. remover autowired como foi feito aqui
+    /** Gera um novo par de tokens a partir de um refresh token válido, sem pedir login e senha:
+     * <ul>
+     *   <li>Valida o refresh token (assinatura, validade e se é do tipo refresh), retornando 401 se for inválido;</li>
+     *   <li>Busca o usuário pelo email que está no subject do refresh token;</li>
+     *   <li>Retorna 200 com um novo token JWT e um novo refresh token.</li>
+     * </ul>
+     */
+    @PostMapping("/atualizar-token")
+    public ResponseEntity atualizarToken(@RequestBody DadosRefreshTokenJWT dados) {
+        String usuarioEmail = tokenService.getUsuarioFromRefreshToken(dados.refreshTokenJWT());
+
+        UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCase(usuarioEmail)
+                .orElseThrow(EntityNotFoundException::new);
+
+        String tokenJWT = tokenService.gerarToken(usuario);
+        String refreshTokenJWT = tokenService.gerarRefreshToken(usuario);
+
+        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT));
+    }
+
+    //todo Testar email em recuperar senha. Terminar testes e refresh token. Validar comentarios e validação de erros
 }

@@ -58,6 +58,7 @@ functionality required by the frontend.
    method in the SecurityFilterChain.
 2. SecurityFilter uses the validation method from TokenService. If the request doesn’t have a token, the filter simply
    passes it along the chain, and Spring handles it through the rules defined in `authorizeHttpRequests` method.
+3. REFRESH TOKEN...
 
 ### Profiles and Authorization
 

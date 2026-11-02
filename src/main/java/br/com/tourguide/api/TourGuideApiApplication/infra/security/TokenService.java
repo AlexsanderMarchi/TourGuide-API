@@ -32,19 +32,38 @@ public class TokenService {
       return JWT.create()
           .withIssuer("API Tour.Guide")
           .withSubject(usuario.getUsername())
+          .withClaim("tipo", "access")
           .withExpiresAt(dataExpiracao())
           .sign(algoritmo);
 
     } catch (JWTCreationException exception) {
-      throw new RuntimeException("erro ao gerrar token jwt", exception);
+      throw new RuntimeException("erro ao gerar token jwt", exception);
     }
   }
+
+  // tem um problema que nao é pego o tratamento de erro pelo SecurityFilter. Todo ver oq fazer
+  public String gerarRefreshToken(UsuarioEntity usuario) {
+    try {
+      var algoritmo = Algorithm.HMAC256(secret);
+      return JWT.create()
+              .withIssuer("API Tour.Guide")
+              .withSubject(usuario.getEmail())
+              .withClaim("tipo", "refresh")
+              .withExpiresAt(dataExpiracaoRefresh())
+              .sign(algoritmo);
+
+    } catch (JWTCreationException exception) {
+      throw new RuntimeException("erro ao gerar refresh token jwt", exception);
+    }
+  }
+
 
   public String getUsuarioFromTokenJWT(String tokenJWT) {
     try {
       var algoritmo = Algorithm.HMAC256(secret);
       return JWT.require(algoritmo)
               .withIssuer("API Tour.Guide")
+              .withClaim("tipo", "access")
               .build()
               .verify(tokenJWT)
               .getSubject();
@@ -53,7 +72,22 @@ public class TokenService {
     }
   }
 
+  // Lança JWTVerificationException se o refresh token for inválido/expirado (tratada como 401 no ErrorsValidation)
+  public String getUsuarioFromRefreshToken(String refreshTokenJWT) {
+    var algoritmo = Algorithm.HMAC256(secret);
+    return JWT.require(algoritmo)
+            .withIssuer("API Tour.Guide")
+            .withClaim("tipo", "refresh")
+            .build()
+            .verify(refreshTokenJWT)
+            .getSubject();
+  }
+
   private Instant dataExpiracao() {
+    return LocalDateTime.now().plusMinutes(30).toInstant(ZoneOffset.of("-03:00"));
+  }
+
+  private Instant dataExpiracaoRefresh() {
     return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
   }
 
