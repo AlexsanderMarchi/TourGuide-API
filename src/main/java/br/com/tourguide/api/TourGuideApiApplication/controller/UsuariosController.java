@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Controller para o módulo de Usuarios, com listagem, criação, atualização e exclusão
  * Obs: Não é usado para a autenticação. Isso é feito pelo UserDetailsService no arquivo UsuarioService.java
- * */
+ */
 @RestController
 @RequestMapping("api/usuario")
 @AllArgsConstructor
@@ -37,21 +37,25 @@ public class UsuariosController {
     }
 
     @PostMapping("/alterar-senha")
-    public ResponseEntity<Void> alterarSenha(@RequestBody @Valid DadosAlteracaoSenha dados, @AuthenticationPrincipal UsuarioEntity logado){
+    public ResponseEntity<Void> alterarSenha(@RequestBody @Valid DadosAlteracaoSenha dados, @AuthenticationPrincipal UsuarioEntity logado) {
         usuarioService.alterarSenha(dados, logado);
         return ResponseEntity.noContent().build();
     }
 
-    /** Etapa 1 do Esqueci Senha: endpoint para enviar o email. Sempre retorna 202, exista o email ou não, para não revelar quem está cadastrado */
+    /**
+     * Etapa 1 do Esqueci Senha: endpoint para enviar o email. Sempre retorna 202, exista o email ou não, para não revelar quem está cadastrado
+     */
     @PostMapping("/esqueci-minha-senha")
-    public ResponseEntity<Void> esqueciMinhaSenha(@RequestBody @Valid DadosEsqueciSenha dados){
+    public ResponseEntity<Void> esqueciMinhaSenha(@RequestBody @Valid DadosEsqueciSenha dados) {
         usuarioService.enviarTokenRecuperacao(dados);
         return ResponseEntity.accepted().build();
     }
 
-    /** Etapa 2 do Esqueci Senha: endpoint usada ao clicar no email recebido para realmente recuperar a senha */
+    /**
+     * Etapa 2 do Esqueci Senha: endpoint usada ao clicar no email recebido para realmente recuperar a senha
+     */
     @PostMapping("/recuperar-senha")
-    public ResponseEntity<Void> recuperarSenha(@RequestBody @Valid DadosRecuperacaoSenha dados){
+    public ResponseEntity<Void> recuperarSenha(@RequestBody @Valid DadosRecuperacaoSenha dados) {
         usuarioService.recuperarSenha(dados);
         return ResponseEntity.noContent().build();
     }

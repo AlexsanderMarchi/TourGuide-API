@@ -35,13 +35,17 @@ public class ErrorsValidation {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário ou senha inválidos");
     }
 
-    /** Refresh token inválido, expirado ou que não é do tipo refresh */
+    /**
+     * Refresh token inválido, expirado ou que não é do tipo refresh
+     */
     @ExceptionHandler(JWTVerificationException.class)
     public ResponseEntity tratarErroToken() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido ou expirado");
     }
 
-    /** Usuário logado, mas sem o perfil exigido pelo @PreAuthorize (ex: USUARIO chamando rota de ADMIN) */
+    /**
+     * Usuário logado, mas sem o perfil exigido pelo @PreAuthorize (ex: USUARIO chamando rota de ADMIN)
+     */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity tratarErro403() {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem permissão para acessar este recurso");
