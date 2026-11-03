@@ -26,7 +26,7 @@ functionality required by the frontend.
 
 ---
 
-### ⚙️ How it works
+## ⚙️ How it works
 
 #### Authentication (JWT, stateless)
 
@@ -49,6 +49,10 @@ functionality required by the frontend.
    request. The TokenService uses Auth0’s JWT library and has two methods: one to generate the token and another to
    validate it.
 
+##### Github Login
+
+1. ...
+
 ##### Requests validation and persistence
 
 1. After login, we need to persist the authentication in subsequent requests. To do that, we store the token on the
@@ -63,7 +67,7 @@ functionality required by the frontend.
    refresh token, which has a longer expiration time (2 hours), is validated, and the endpoint returns a new access
    token and refresh token.
 
-### Profiles and Authorization
+##### Profiles and Authorization
 
 1. For user profiles, we created a new entity, `PerfilEntity`, which is referenced in UsuarioEntity.
 2. For authorization, the UserDetails interface already provides the getAuthorities method, which Spring Security uses
@@ -72,7 +76,9 @@ functionality required by the frontend.
    controllers. To enable it, we first need to add the `@EnableMethodSecurity` annotation to the ConfigurationSecurity
    class.
 
-### Respostas de erro
+##### Password changes
+
+1. ...
 
 ---
 

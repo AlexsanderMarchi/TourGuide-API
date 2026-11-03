@@ -73,8 +73,7 @@ public class AutenticacaoController {
     public ResponseEntity atualizarToken(@RequestBody DadosRefreshTokenJWT dados) {
         String usuarioEmail = tokenService.getUsuarioFromRefreshToken(dados.refreshTokenJWT());
 
-        UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCase(usuarioEmail)
-                .orElseThrow(EntityNotFoundException::new);
+        UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCase(usuarioEmail).orElseThrow(EntityNotFoundException::new);
 
         String tokenJWT = tokenService.gerarToken(usuario);
         String refreshTokenJWT = tokenService.gerarRefreshToken(usuario);
@@ -82,5 +81,5 @@ public class AutenticacaoController {
         return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT));
     }
 
-    //todo Testar email em recuperar senha. Terminar testes e refresh token. Validar comentarios e validação de erros
+    //todo 1- Testar email em recuperar senha; 2- Terminar testes. 3- validação de erros. 4- finalizar oauth do github
 }

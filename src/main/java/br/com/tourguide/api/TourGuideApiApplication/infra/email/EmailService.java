@@ -6,7 +6,11 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-/** Envia emails pela configuração spring.mail.* do application.properties */
+//todo falta testar
+
+/**
+ * Envia emails pela configuração spring.mail.* do application.properties
+ */
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -28,11 +32,11 @@ public class EmailService {
         mensagem.setSubject("Tour.Guide - Recuperação de senha");
         mensagem.setText("""
                 Olá!
-
+                
                 Recebemos um pedido para redefinir a sua senha. Acesse o link abaixo para criar uma nova:
-
+                
                 %s
-
+                
                 O link expira em %d minutos. Se não foi você que pediu, ignore este email.
                 """.formatted(link, minutosValidade));
 
