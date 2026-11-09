@@ -1,17 +1,8 @@
 package br.com.tourguide.api.TourGuideApiApplication.domain.github;
 
-import br.com.tourguide.api.TourGuideApiApplication.domain.senha.DadosAlteracaoSenha;
-import br.com.tourguide.api.TourGuideApiApplication.domain.senha.DadosEsqueciSenha;
-import br.com.tourguide.api.TourGuideApiApplication.domain.senha.DadosRecuperacaoSenha;
-import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioEntity;
-import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRepository;
-import br.com.tourguide.api.TourGuideApiApplication.infra.email.EmailService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -28,6 +19,11 @@ import java.util.Map;
 @Service
 public class GithubService {
 
+//    @Value("${github.oauth.client.id}")
+//    private String clientId;
+//    @Value("${github.oauth.client.secret}")
+//    private String clientSecret;
+
     private final String clientId = "teste";
     private final String clientSecret = "teste";
     private final String redirectUri = "http://localhost:8080/api/auth/login/github/autorizado";
@@ -41,7 +37,7 @@ public class GithubService {
         return "https://github.com/login/oauth/authorize" +
                 "?client_id=" + clientId +
                 "&redirect_uri=" + redirectUri +
-                "&scope=read:user,user:email";
+                "&scope=user:email";
     }
 
     private String obterToken(String code) {

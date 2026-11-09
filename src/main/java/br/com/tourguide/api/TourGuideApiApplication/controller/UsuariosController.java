@@ -59,4 +59,12 @@ public class UsuariosController {
         usuarioService.recuperarSenha(dados);
         return ResponseEntity.noContent().build();
     }
+
+    //todo testar geramento de imagem
+    @PatchMapping("/configurar-a2f")
+    public ResponseEntity<String> gerarQrCode(@AuthenticationPrincipal UsuarioEntity logado){
+        var url = usuarioService.gerarQrCode(logado);
+        return ResponseEntity.ok(url);
+    }
+
 }

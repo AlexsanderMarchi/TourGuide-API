@@ -4,12 +4,14 @@ import br.com.tourguide.api.TourGuideApiApplication.domain.senha.DadosAlteracaoS
 import br.com.tourguide.api.TourGuideApiApplication.domain.senha.DadosEsqueciSenha;
 import br.com.tourguide.api.TourGuideApiApplication.domain.senha.DadosRecuperacaoSenha;
 import br.com.tourguide.api.TourGuideApiApplication.infra.email.EmailService;
+import br.com.tourguide.api.TourGuideApiApplication.infra.totp.TotpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service para:
@@ -27,6 +29,7 @@ public class UsuarioService implements UserDetailsService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder encriptador;
     private final EmailService emailService;
+    private final TotpService totpService;
 
     private static final long MINUTOS_VALIDADE_EMAIL_TOKEN = 30;
 
@@ -82,5 +85,14 @@ public class UsuarioService implements UserDetailsService {
 
         usuario.alterarSenha(encriptador.encode(dados.novaSenha()));
         usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public String gerarQrCode(UsuarioEntity logado) {
+        var secret = totpService.gerarSecret();
+        logado.gerarSecret(secret);
+        usuarioRepository.save(logado);
+
+        return totpService.gerarQrCode(logado);
     }
 }
