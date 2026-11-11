@@ -19,7 +19,7 @@ import java.util.Map;
 @Service
 public class GithubService {
 
-//    @Value("${github.oauth.client.id}")
+//    @Value("${github.oauth.client.id}") //todo add secret no github
 //    private String clientId;
 //    @Value("${github.oauth.client.secret}")
 //    private String clientSecret;

@@ -16,7 +16,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 // Todo usar redis para salvar a senha
 @RestController
@@ -41,8 +44,9 @@ public class AutenticacaoController {
      *   <li>Monta um {@code UsernamePasswordAuthenticationToken} com o username e a senha recebidos;</li>
      *   <li>O AuthenticationManager autentica esse token (busca o usuário no banco e compara a senha com BCrypt),
      *   lançando exceção se as credenciais forem inválidas;</li>
-     *   <li>Com o usuário autenticado, o TokenService gera o token JWT e o refresh token JWT;</li>
-     *   <li>Retorna 200 com os JWTs no corpo da resposta.</li>
+     *   <li>Com o usuário autenticado, ele valida se tem autenticação de dois fatores </li>
+     *   <li>Caso tenha, ele retorna com os tokens JWT null e apenas com o Boolean {@code a2f} como true, assim sendo validado em outro endpoint; </li>
+     *   <li>Caso não tenha A2F ativo, o TokenService gera o token JWT e o refresh token JWT e os retorna no corpo da resposta com status 200.</li>
      * </ul>
      * Diferença entre {@code tokenLogin}, {@code tokenJWT} e  {@code refreshTokenJWT}:
      * <ul>
@@ -55,12 +59,12 @@ public class AutenticacaoController {
      * </ul>
      */
     @PostMapping
-    public ResponseEntity efetuarLogin(@RequestBody UsuarioLoginRecord dados) {
+    public ResponseEntity<DadosTokenJWT> efetuarLogin(@RequestBody UsuarioLoginRecord dados) {
         UsernamePasswordAuthenticationToken tokenLogin = new UsernamePasswordAuthenticationToken(dados.username(), dados.password());
         Authentication authentication = manager.authenticate(tokenLogin);
 
-        var usuario = (UsuarioEntity) authentication.getPrincipal();
-        if(usuario.isA2fAtiva()){
+        UsuarioEntity usuario = (UsuarioEntity) authentication.getPrincipal();
+        if (usuario.isA2fAtiva()) {
             return ResponseEntity.ok(new DadosTokenJWT(null, null, true));
         }
 
@@ -71,7 +75,7 @@ public class AutenticacaoController {
     }
 
     /**
-     * Gera um novo par de tokens a partir de um refresh token válido, assim evitando ter pedir login e senha:
+     * Gera um novo par de tokens a partir de um refresh token válido, assim evitando ter pedir login e senha toda hora:
      * <ul>
      *   <li>Valida o refresh token (assinatura, validade e se é do tipo refresh), retornando 401 se for inválido;</li>
      *   <li>Busca o usuário pelo email que está no subject do refresh token;</li>
@@ -82,7 +86,7 @@ public class AutenticacaoController {
      * que o access token.
      */
     @PostMapping("/atualizar-token")
-    public ResponseEntity atualizarToken(@RequestBody DadosRefreshTokenJWT dados) {
+    public ResponseEntity<DadosTokenJWT> atualizarToken(@RequestBody DadosRefreshTokenJWT dados) {
         String usuarioEmail = tokenService.getUsuarioFromRefreshToken(dados.refreshTokenJWT());
 
         UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCase(usuarioEmail).orElseThrow(EntityNotFoundException::new);
@@ -93,12 +97,23 @@ public class AutenticacaoController {
         return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT, false));
     }
 
+    /**
+     * Segunda etapa do login para usuários com autenticação de dois fatores (A2F) ativa:
+     * <ul>
+     *   <li>É chamado depois que o {@code efetuarLogin} retorna {@code a2f} como true e os tokens JWT null;</li>
+     *   <li>Recebe o email do usuário e o código de 6 dígitos gerado pelo app autenticador (Google Authenticator, Authy, etc.);</li>
+     *   <li>Busca o usuário pelo email e o TotpService valida o código com o secret do A2F salvo no usuário;</li>
+     *   <li>Se o código for inválido ou expirado, lança {@code BadCredentialsException}, retornando 401;</li>
+     *   <li>Se o código for válido, o TokenService gera o token JWT e o refresh token JWT e os retorna com status 200.</li>
+     * </ul>
+     * O código do app autenticador (TOTP) muda a cada 30 segundos e é calculado a partir do secret compartilhado
+     * na leitura do QR code ({@code configurar-a2f}), por isso só quem tem o celular cadastrado consegue gerá-lo.
+     */
     @PostMapping("/verificar-a2f")
-    public ResponseEntity<DadosTokenJWT> verificarSegundoFator(@Valid @RequestBody DadosA2F dadosA2F){
-        var usuario = usuarioRepository.findByEmailIgnoreCase(dadosA2F.email())
-                .orElseThrow();
+    public ResponseEntity<DadosTokenJWT> verificarSegundoFator(@Valid @RequestBody DadosA2F dadosA2F) {
+        var usuario = usuarioRepository.findByEmailIgnoreCase(dadosA2F.email()).orElseThrow();
         var codigoValido = totpService.verificarCodigo(dadosA2F.codigo(), usuario);
-        if(!codigoValido){
+        if (!codigoValido) {
             throw new BadCredentialsException("Código inválido");
         }
 
@@ -108,5 +123,5 @@ public class AutenticacaoController {
         return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT, false));
     }
 
-    //todo 1- Testar email em recuperar senha; 2- Terminar testes. 3- validação de erros. 4- documentar oAuth do github e do A2F
+    //todo 1- Testar email em recuperar senha; 2- Terminar testes. 3- validação de erros. 4- documentar e testar oAuth do github
 }
