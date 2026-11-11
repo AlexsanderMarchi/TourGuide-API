@@ -13,6 +13,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Filtro que autentica o usuário a cada requisição a partir do token JWT:
+ * <ul>
+ *   <li>Estende {@code OncePerRequestFilter}, garantindo que roda uma única vez por requisição;</li>
+ *   <li>É registrado no ConfigurationSecurity antes do {@code UsernamePasswordAuthenticationFilter}, para que o usuário
+ *   já esteja autenticado quando o Spring Security checar as regras de acesso;</li>
+ * </ul>
+ */
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
@@ -22,6 +30,17 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Autowired
     private UsuarioRepository repository;
 
+    /**
+     * Executado a cada requisição:
+     * <ul>
+     *   <li>Recupera o token JWT do header {@code Authorization};</li>
+     *   <li>Se houver token, o TokenService valida (assinatura, validade e se é do tipo access) e extrai o email do subject;</li>
+     *   <li>Busca o usuário pelo email e, se encontrar, coloca-o no {@code SecurityContextHolder} junto com os perfis
+     *   (authorities), que são usados pelo {@code @PreAuthorize} e pelo {@code @AuthenticationPrincipal};</li>
+     *   <li>Se não houver token, segue sem autenticar: rotas públicas funcionam normalmente e as protegidas retornam 401;</li>
+     *   <li>Por fim, chama {@code filterChain.doFilter} para a requisição seguir para os próximos filtros e o controller.</li>
+     * </ul>
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String tokenJWT = recuperarToken(request);

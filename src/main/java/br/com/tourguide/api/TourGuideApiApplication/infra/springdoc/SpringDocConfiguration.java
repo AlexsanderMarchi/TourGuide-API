@@ -20,18 +20,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SpringDocConfiguration {
 
-  @Bean
-  public OpenAPI customOpenAPI() {
-    return new OpenAPI()
-        .info(new Info()
-            .title("Tour Guide API")
-            .description("API REST do Tour Guide")
-            .version("v1"))
-        .components(new Components()
-            .addSecuritySchemes("bearer-key", new SecurityScheme()
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT")))
-        .addSecurityItem(new SecurityRequirement().addList("bearer-key"));
-  }
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .info(new Info()
+                        .title("Tour Guide API")
+                        .description("API REST do Tour Guide")
+                        .version("v1"))
+                .components(new Components()
+                        .addSecuritySchemes("bearer-key", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")))
+                .addSecurityItem(new SecurityRequirement().addList("bearer-key"));
+    }
 }

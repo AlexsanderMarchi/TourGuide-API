@@ -24,6 +24,8 @@ public class UsuarioEntity implements UserDetails {
     private String nome;
     private String senha;
     private String email;
+    private String secret;
+    private Boolean a2fAtiva;
 
     /**
      * Linkagem de tabela perfil ao usuario. ManyToOne pq é muitos usuarios para um perfil
@@ -92,5 +94,17 @@ public class UsuarioEntity implements UserDetails {
 
     public boolean tokenRecuperacaoExpirado() {
         return expiracaoToken == null || LocalDateTime.now().isAfter(expiracaoToken);
+    }
+
+    public void gerarSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public void ativarA2f() {
+        this.a2fAtiva = true;
+    }
+
+    public boolean isA2fAtiva() {
+        return this.a2fAtiva;
     }
 }

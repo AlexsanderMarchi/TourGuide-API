@@ -18,7 +18,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity // Habilita o @PreAuthorize nos controllers
 public class ConfigurationSecurity {
 
-    /** Define as regras de segurança HTTP da API:
+    /**
+     * Define as regras de segurança HTTP da API:
      * <ul>
      *   <li>Desabilita o CSRF (API REST, sem formulários);</li>
      *   <li>Não cria sessão (STATELESS): cada requisição se autentica pelo token JWT, sem JSESSIONID;</li>
@@ -37,7 +38,7 @@ public class ConfigurationSecurity {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/login/atualizar-token", "/error",
+                        .requestMatchers("/api/auth/login/**", "/error",
                                 "/api/usuario/esqueci-minha-senha", "/api/usuario/recuperar-senha").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated())
@@ -50,19 +51,21 @@ public class ConfigurationSecurity {
         return http.build();
     }
 
-    /** Expõe o AuthenticationManager que o Spring monta automaticamente (usando o UserDetailsService
-     e o PasswordEncoder registrados) para que possa ser injetado no AutenticacaoController e
-     usado para autenticar manualmente o usuário no login.
-    */
+    /**
+     * Expõe o AuthenticationManager que o Spring monta automaticamente (usando o UserDetailsService
+     * e o PasswordEncoder registrados) para que possa ser injetado no AutenticacaoController e
+     * usado para autenticar manualmente o usuário no login.
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) {
         return configuration.getAuthenticationManager();
     }
 
-    /** Define o BCrypt como algoritmo de hash de senhas: o Spring o usa para comparar a senha
-    informada no login com o hash salvo no banco (e deve ser usado também ao cadastrar senhas).
-     Obs: Bean obrigatorio quando se configura mysql
-    */
+    /**
+     * Define o BCrypt como algoritmo de hash de senhas: o Spring o usa para comparar a senha
+     * informada no login com o hash salvo no banco (e deve ser usado também ao cadastrar senhas).
+     * Obs: Bean obrigatorio quando se configura mysql
+     */
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
