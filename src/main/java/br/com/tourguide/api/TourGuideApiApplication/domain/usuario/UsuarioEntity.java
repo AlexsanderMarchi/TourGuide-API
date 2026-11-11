@@ -99,4 +99,12 @@ public class UsuarioEntity implements UserDetails {
     public void gerarSecret(String secret) {
         this.secret = secret;
     }
+
+    public void ativarA2f() {
+        this.a2fAtiva = true;
+    }
+
+    public boolean isA2fAtiva() {
+        return this.a2fAtiva;
+    }
 }

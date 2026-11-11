@@ -58,6 +58,6 @@ public class GithubController {
         String tokenJWT = tokenService.gerarToken(usuario);
         String refreshTokenJWT = tokenService.gerarRefreshToken(usuario);
 
-        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT));
+        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT, false));
     }
 }

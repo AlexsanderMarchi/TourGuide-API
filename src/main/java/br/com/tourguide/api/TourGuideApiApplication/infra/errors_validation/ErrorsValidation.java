@@ -32,7 +32,7 @@ public class ErrorsValidation {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity tratarErroCredenciais() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário ou senha inválidos");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas");
     }
 
     /**

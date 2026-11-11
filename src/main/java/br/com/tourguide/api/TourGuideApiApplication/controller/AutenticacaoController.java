@@ -1,15 +1,19 @@
 package br.com.tourguide.api.TourGuideApiApplication.controller;
 
+import br.com.tourguide.api.TourGuideApiApplication.domain.autenticacao.DadosA2F;
 import br.com.tourguide.api.TourGuideApiApplication.domain.autenticacao.DadosRefreshTokenJWT;
 import br.com.tourguide.api.TourGuideApiApplication.domain.autenticacao.DadosTokenJWT;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioEntity;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioLoginRecord;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRepository;
 import br.com.tourguide.api.TourGuideApiApplication.infra.security.TokenService;
+import br.com.tourguide.api.TourGuideApiApplication.infra.totp.TotpService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +31,9 @@ public class AutenticacaoController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private TotpService totpService;
 
     /**
      * Realiza o login do usuário e devolve um token JWT:
@@ -52,10 +59,15 @@ public class AutenticacaoController {
         UsernamePasswordAuthenticationToken tokenLogin = new UsernamePasswordAuthenticationToken(dados.username(), dados.password());
         Authentication authentication = manager.authenticate(tokenLogin);
 
-        String tokenJWT = tokenService.gerarToken((UsuarioEntity) authentication.getPrincipal());
-        String refreshTokenJWT = tokenService.gerarRefreshToken((UsuarioEntity) authentication.getPrincipal());
+        var usuario = (UsuarioEntity) authentication.getPrincipal();
+        if(usuario.isA2fAtiva()){
+            return ResponseEntity.ok(new DadosTokenJWT(null, null, true));
+        }
 
-        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT));
+        String tokenJWT = tokenService.gerarToken(usuario);
+        String refreshTokenJWT = tokenService.gerarRefreshToken(usuario);
+
+        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT, false));
     }
 
     /**
@@ -78,8 +90,23 @@ public class AutenticacaoController {
         String tokenJWT = tokenService.gerarToken(usuario);
         String refreshTokenJWT = tokenService.gerarRefreshToken(usuario);
 
-        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT));
+        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT, false));
     }
 
-    //todo 1- Testar email em recuperar senha; 2- Terminar testes. 3- validação de erros. 4- finalizar oauth do github
+    @PostMapping("/verificar-a2f")
+    public ResponseEntity<DadosTokenJWT> verificarSegundoFator(@Valid @RequestBody DadosA2F dadosA2F){
+        var usuario = usuarioRepository.findByEmailIgnoreCase(dadosA2F.email())
+                .orElseThrow();
+        var codigoValido = totpService.verificarCodigo(dadosA2F.codigo(), usuario);
+        if(!codigoValido){
+            throw new BadCredentialsException("Código inválido");
+        }
+
+        String tokenJWT = tokenService.gerarToken(usuario);
+        String refreshTokenJWT = tokenService.gerarRefreshToken(usuario);
+
+        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT, false));
+    }
+
+    //todo 1- Testar email em recuperar senha; 2- Terminar testes. 3- validação de erros. 4- documentar oAuth do github e do A2F
 }
