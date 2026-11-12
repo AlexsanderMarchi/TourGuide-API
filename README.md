@@ -49,6 +49,12 @@ functionality required by the frontend.
    request. The TokenService uses Auth0’s JWT library and has two methods: one to generate the token and another to
    validate it.
 
+##### Two-factor authentication
+
+1. For more security, we have a optional a2f validation. In `UsuariosController` we have the endpoint to generate the
+   QR, where its use the atlassian library to create the secret, that will be store in the database. After the front
+   gets the QR code url and sign in the auth application (authy, )
+
 ##### Github Login
 
 1. ...
