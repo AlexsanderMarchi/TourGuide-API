@@ -1,9 +1,10 @@
 package br.com.tourguide.api.TourGuideApiApplication.controller;
 
-import br.com.tourguide.api.TourGuideApiApplication.domain.autenticacao.DadosTokenJWT;
+import br.com.tourguide.api.TourGuideApiApplication.domain.autenticacao.DadosLogin;
 import br.com.tourguide.api.TourGuideApiApplication.domain.github.GithubService;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioEntity;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRepository;
+import br.com.tourguide.api.TourGuideApiApplication.infra.security.CookiesToken;
 import br.com.tourguide.api.TourGuideApiApplication.infra.security.TokenService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class GithubController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private CookiesToken cookiesToken;
+
     public GithubController(GithubService githubService, TokenService tokenService) {
         this.githubService = githubService;
         this.tokenService = tokenService;
@@ -45,7 +49,7 @@ public class GithubController {
     }
 
     @GetMapping("/autorizado")
-    public ResponseEntity<DadosTokenJWT> obterToken(@RequestParam String code) {
+    public ResponseEntity<DadosLogin> obterToken(@RequestParam String code) {
 
         String email = githubService.obterEmail(code);
 
@@ -58,6 +62,8 @@ public class GithubController {
         String tokenJWT = tokenService.gerarToken(usuario);
         String refreshTokenJWT = tokenService.gerarRefreshToken(usuario);
 
-        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT, refreshTokenJWT, false));
+        return ResponseEntity.ok()
+                .headers(cookiesToken.criar(tokenJWT, refreshTokenJWT))
+                .body(new DadosLogin(false));
     }
 }

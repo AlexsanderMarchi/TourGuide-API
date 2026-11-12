@@ -30,10 +30,13 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Autowired
     private UsuarioRepository repository;
 
+    @Autowired
+    private CookiesToken cookiesToken;
+
     /**
      * Executado a cada requisição:
      * <ul>
-     *   <li>Recupera o token JWT do header {@code Authorization};</li>
+     *   <li>Recupera o token JWT do cookie {@code access_token} (ou do header {@code Authorization} para testes);</li>
      *   <li>Se houver token, o TokenService valida (assinatura, validade e se é do tipo access) e extrai o email do subject;</li>
      *   <li>Busca o usuário pelo email e, se encontrar, coloca-o no {@code SecurityContextHolder} junto com os perfis
      *   (authorities), que são usados pelo {@code @PreAuthorize} e pelo {@code @AuthenticationPrincipal};</li>
@@ -57,8 +60,17 @@ public class SecurityFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * O navegador manda o token no cookie HttpOnly {@code access_token}.
+     * a validação do heade é usado para testes via Postman/Insomnia.
+     */
     private String recuperarToken(HttpServletRequest request) {
-        var authorizationHeader = request.getHeader("Authorization");
+        String tokenCookie = cookiesToken.ler(request, CookiesToken.ACCESS_TOKEN);
+        if (tokenCookie != null) {
+            return tokenCookie;
+        }
+
+        String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader != null) {
             return authorizationHeader.replace("Bearer ", "");
         }
