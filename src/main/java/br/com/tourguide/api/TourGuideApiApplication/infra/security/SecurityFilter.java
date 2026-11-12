@@ -49,7 +49,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         String tokenJWT = recuperarToken(request);
 
         if (tokenJWT != null) {
-            var usuarioEmail = tokenService.getUsuarioFromTokenJWT(tokenJWT);
+            String usuarioEmail = tokenService.getUsuarioFromTokenJWT(tokenJWT);
 
             repository.findByEmailIgnoreCase(usuarioEmail).ifPresent(usuario -> {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());

@@ -26,7 +26,7 @@ public class CookiesToken {
     public static final String ACCESS_TOKEN = "access_token";
     public static final String REFRESH_TOKEN = "refresh_token";
 
-    private static final String PATH_ACCESS = "/api/auth/login";
+    private static final String PATH_ACCESS = "/api";
     private static final String PATH_REFRESH = "/api/auth/login/atualizar-token";
 
     // mesmos tempos de expiração do TokenService
@@ -41,7 +41,7 @@ public class CookiesToken {
      * Headers {@code Set-Cookie} com os dois tokens, para serem colocados na resposta do login/refresh.
      */
     public HttpHeaders criar(String tokenJWT, String refreshTokenJWT) {
-        var headers = new HttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.SET_COOKIE, montar(ACCESS_TOKEN, tokenJWT, PATH_ACCESS, DURACAO_ACCESS).toString());
         headers.add(HttpHeaders.SET_COOKIE, montar(REFRESH_TOKEN, refreshTokenJWT, PATH_REFRESH, DURACAO_REFRESH).toString());
         return headers;
@@ -51,7 +51,7 @@ public class CookiesToken {
      * Headers {@code Set-Cookie} que apagam os dois tokens (mesmo nome e path, com Max-Age 0), usados no logout.
      */
     public HttpHeaders apagar() {
-        var headers = new HttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.SET_COOKIE, montar(ACCESS_TOKEN, "", PATH_ACCESS, Duration.ZERO).toString());
         headers.add(HttpHeaders.SET_COOKIE, montar(REFRESH_TOKEN, "", PATH_REFRESH, Duration.ZERO).toString());
         return headers;
