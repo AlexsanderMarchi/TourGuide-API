@@ -145,7 +145,4 @@ public class AutenticacaoController {
     public ResponseEntity<Void> logout() {
         return ResponseEntity.ok().headers(cookiesToken.apagar()).build();
     }
-
-    //todo 1- Testar email em recuperar senha; 2- Terminar testes. 3- validação de erros (erro de Runtime no arquivo tokenServise)
-    //todo 4- documentar e testar oAuth do github 5- arrumar path do acces token para nao mandar dos api/auth/**
-}
+ }

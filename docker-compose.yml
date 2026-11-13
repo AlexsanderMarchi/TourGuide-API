@@ -1,9 +1,39 @@
 services:
+  db:
+    image: mysql:8.4
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}            # cria o banco na primeira subida
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3307:3306"             # opcional: acessar pelo Workbench/DBeaver em localhost:3307 (3307 para não conflitar com o MySQL do Windows)
+    volumes:
+      - mysql_data:/var/lib/mysql              # os dados sobrevivem ao recriar o container
+    healthcheck:                               # só fica "healthy" quando o MySQL aceita conexões
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   api:                          # nome do serviço = host "api" usado no nginx.conf
     build: .                    # usa o Dockerfile desta pasta (o back)
     container_name: api
     ports:
       - "8080:8080"             # opcional: só para testar a API direto (Postman/navegador)
+    environment:
+      SPRING_DATASOURCE_URL: ${DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+#      JWT_SECRET: ${JWT_SECRET}
+#      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+#      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+#      MAIL_USERNAME: ${MAIL_USERNAME}
+#      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      FRONTEND_URL: http://localhost:3000
+      COOKIE_SECURE: "false"    # acesso por http://localhost; em produção (HTTPS) deve ser true
+    depends_on:
+      db:
+        condition: service_healthy             # espera o MySQL estar pronto, não só iniciado
 
   front:
     build: ../TourGuide         # usa o Dockerfile do front, na pasta ao lado
@@ -12,5 +42,7 @@ services:
       - "3000:8080"             # acesso ao site: http://localhost:3000
     depends_on:
       - api                     # sobe o back antes do front
+volumes:
+  mysql_data:
 
 # ao rodar o comando: docker compose up --build, ira criar as duas imagens e subir os containers

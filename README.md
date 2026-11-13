@@ -26,9 +26,7 @@ functionality required by the frontend.
 
 ---
 
-## ⚙️ How it works
-
-#### Authentication (JWT, stateless)
+### ⚙️ How it works (Authentication JWT, stateless)
 
 ##### Login
 
@@ -49,15 +47,19 @@ functionality required by the frontend.
    request. The TokenService uses Auth0’s JWT library and has two methods: one to generate the token and another to
    validate it.
 
-##### Two-factor authentication
-
-1. For more security, we have a optional a2f validation. In `UsuariosController` we have the endpoint to generate the
-   QR, where its use the atlassian library to create the secret, that will be store in the database. After the front
-   gets the QR code url and sign in the auth application (authy, )
-
 ##### Github Login
 
 1. ...
+
+##### Two-factor authentication
+
+1. For additional security, we offer optional 2FA (two-factor authentication). `UsuariosController` has an
+   endpoint that generates the QR code, using the Atlassian library to create the secret, which is stored in
+   the database.
+2. After the front end gets the QR code URL and the user registers it in their authenticator app, a second
+   endpoint must be called to activate 2FA. This saves the activated status in the database.
+3. From then on, every login requires a second step with the authentication code. 2FA does not apply to the
+   GitHub login option.
 
 ##### Requests validation and persistence
 
@@ -88,22 +90,28 @@ functionality required by the frontend.
 
 ---
 
-## 📡 Endpoints
+### 📡 Endpoints
 
-| Método | Rota                               | Autenticação | Descrição                                                    |
-|--------|------------------------------------|--------------|--------------------------------------------------------------|
-| `POST` | `/api/auth/login`                  | Pública      | Faz o login e retorna o JWT e o refresh token                |
-| `POST` | `/api/auth/login/atualizar-token`  | Pública      | Recebe o refresh token e retorna um novo JWT e refresh token |
-| `GET`  | `/api/usuario/lista`               | `ADMIN`      | Lista os usuários com seus perfis                            |
-| `POST` | `/api/usuario/alterar-senha`       | Autenticada  | Altera a senha do usuário logado                             |
-| `POST` | `/api/usuario/esqueci-minha-senha` | Pública      | Envia por email o token de recuperação de senha              |
-| `POST` | `/api/usuario/recuperar-senha`     | Pública      | Redefine a senha usando o token recebido por email           |
+| Método  | Rota                                | Autenticação | Descrição                                                                         |
+|---------|-------------------------------------|--------------|-----------------------------------------------------------------------------------|
+| `POST`  | `/api/auth/login`                   | Pública      | Faz o login e devolve o JWT e o refresh token em cookies (ou pede o código A2F)   |
+| `POST`  | `/api/auth/login/verificar-a2f`     | Pública      | Valida o código do app autenticador e devolve os tokens em cookies                |
+| `POST`  | `/api/auth/login/atualizar-token`   | Pública      | Usa o cookie do refresh token para gerar um novo JWT e refresh token              |
+| `GET`   | `/api/auth/login/github`            | Pública      | Redireciona para a tela de autorização do GitHub (OAuth)                          |
+| `GET`   | `/api/auth/login/github/autorizado` | Pública      | Callback do GitHub: busca o email do usuário e devolve os tokens                  |
+| `POST`  | `/api/auth/logout`                  | Pública      | Faz o logout apagando os cookies dos tokens                                       |
+| `GET`   | `/api/usuario/lista`                | `ADMIN`      | Lista os usuários com seus perfis                                                 |
+| `POST`  | `/api/usuario/alterar-senha`        | Autenticada  | Altera a senha do usuário logado                                                  |
+| `POST`  | `/api/usuario/esqueci-minha-senha`  | Pública      | Envia por email o token de recuperação de senha                                   |
+| `POST`  | `/api/usuario/recuperar-senha`      | Pública      | Redefine a senha usando o token recebido por email                                |
+| `PATCH` | `/api/usuario/configurar-a2f`       | Autenticada  | Gera o secret do A2F e devolve a URL do QR code                                   |
+| `PATCH` | `/api/usuario/ativar-a2f`           | Autenticada  | Confirma o código do app autenticador e ativa o A2F                               |
 
-## 🗄️ Banco de dados
+### 🗄️ Banco de dados
 
----
+- 
 
-## 🚀 Como rodar
+### 🚀 Como rodar
 
 ### Pré-requisitos
 
@@ -113,39 +121,53 @@ functionality required by the frontend.
 
 ### Localmente
 
+- 
+
 ### Variáveis de ambiente
+
+-
 
 ### Com Docker Compose (API + front)
 
-## 🔄 CI/CD
+-
 
-## 📁 Estrutura
+### 🔄 CI/CD
+
+-
+
+### 📁 Estrutura
 
 ```
 src/main/java/.../TourGuideApiApplication
-├── controller/          # Endpoints REST (login, usuários)
+├── controller/             # Endpoints REST (login, login pelo GitHub, usuários)
 ├── domain/
-│   ├── usuario/         # Entidade, repositório, service e DTOs de usuário
-│   └── perfil/          # Entidade de perfil
+│   ├── autenticacao/       # DTOs do login e do A2F
+│   ├── github/             # Service e DTOs do login OAuth com o GitHub
+│   ├── perfil/             # Entidade de perfil
+│   ├── senha/              # DTOs de alterar, esqueci e recuperar senha
+│   └── usuario/            # Entidade, repositório, service e DTOs de usuário
 └── infra/
-    ├── security/        # Configuração do Spring Security, filtro e serviço de JWT
-    └── errors_validation/  # Tratamento global de erros
+    ├── email/              # Envio de emails (recuperação de senha)
+    ├── errors_validation/  # Tratamento global de erros
+    ├── security/           # Spring Security, filtro, serviço de JWT e cookies dos tokens
+    ├── springdoc/          # Configuração do Swagger / OpenAPI
+    └── totp/               # Geração e validação dos códigos do A2F (TOTP)
 ```
 
 ---
 
-## 📌 Próximos passos
+### 📌 Próximos passos
 
-- [ ] Cadastro de usuários
-- [ ] Usar Redis <!-- conforme o TODO do AutenticacaoController -->
-- [ ] Banco H2 para desenvolvimento e testes
-- [ ] Template de PR
-
-<!-- adicione o que mais estiver planejado -->
+- [ ] Finalizar endpoints dos usuários
+- [ ] Finalizar validação de erros
+- [ ] Finalizar testes
+- [ ] Arrumar path do acces token para nao mandar dos api/auth/** 
+- [ ] Documentar e testar oAuth do github
+- [ ] Testar email em recuperar senha
 
 ---
 
-## 👤 Autor
+### 👤 Autor
 
 **Alexsander Marchi** <!-- confira o nome -->
-[GitHub](https://github.com/AlexsanderMarchi) · [LinkedIn](https://www.linkedin.com/in/SEU-LINKEDIN)
+[GitHub](https://github.com/AlexsanderMarchi) · [LinkedIn](https://www.linkedin.com/in/alexsander-marchi-zunino-226332170)
