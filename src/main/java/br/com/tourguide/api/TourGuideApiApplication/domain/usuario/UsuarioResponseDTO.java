@@ -13,10 +13,12 @@ public class UsuarioResponseDTO {
     private String nome;
     private String perfil;
     private String email;
+    private String fotoPerfil;
 
     public UsuarioResponseDTO(UsuarioEntity usuario) {
         this.nome = usuario.getNome();
         this.perfil = usuario.getPerfil().getNome();
         this.email = usuario.getEmail();
+        this.fotoPerfil = usuario.getFotoPerfil();
     }
 }

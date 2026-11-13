@@ -27,6 +27,14 @@ public class UsuarioEntity implements UserDetails {
     private String secret;
     private Boolean a2fAtiva;
 
+    // columnDefinition para o Hibernate (ddl-auto=update) não "corrigir" a coluna de volta para varchar(255)
+    @Column(name = "foto_perfil", columnDefinition = "LONGTEXT")
+    private String fotoPerfil;
+
+    public void salvarFoto(String fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
+    }
+
     /**
      * Linkagem de tabela perfil ao usuario. ManyToOne pq é muitos usuarios para um perfil
      */

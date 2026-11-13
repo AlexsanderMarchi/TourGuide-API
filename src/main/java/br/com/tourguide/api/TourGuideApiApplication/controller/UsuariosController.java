@@ -3,6 +3,7 @@ package br.com.tourguide.api.TourGuideApiApplication.controller;
 import br.com.tourguide.api.TourGuideApiApplication.domain.senha.DadosAlteracaoSenha;
 import br.com.tourguide.api.TourGuideApiApplication.domain.senha.DadosEsqueciSenha;
 import br.com.tourguide.api.TourGuideApiApplication.domain.senha.DadosRecuperacaoSenha;
+import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.DadosFotoPerfil;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioEntity;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioRepository;
 import br.com.tourguide.api.TourGuideApiApplication.domain.usuario.UsuarioResponseDTO;
@@ -15,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Controller para o módulo de Usuarios, com listagem, criação, atualização e exclusão
@@ -42,6 +44,28 @@ public class UsuariosController {
         return ResponseEntity.ok(usuarioRepository.findAll().stream() //findAll ja é méthodo padrao do JPA.
                 .map(UsuarioResponseDTO::new)
                 .toList());
+    }
+
+    /**
+     * Retorna dados do usuário logado, pegando do contexto salvo pelo filter:
+     */
+    @GetMapping("/me")
+    public ResponseEntity<UsuarioResponseDTO> buscarUsuarioDados(@AuthenticationPrincipal UsuarioEntity logado) {
+        return ResponseEntity.ok(new UsuarioResponseDTO(logado));
+    }
+
+    /**
+     * Adiciona ou troca a foto de perfil do usuário logado. É opcional, por isso fica separado do cadastro:
+     * <ul>
+     *   <li>Recebe a foto em base64 no campo {@code fotoBase64} (puro ou no formato data URI);</li>
+     *   <li>Retorna 400 se o base64 for inválido, se não for PNG/JPEG ou se passar do tamanho máximo;</li>
+     *   <li>Se der certo, salva a foto e retorna 204.</li>
+     * </ul>
+     */
+    @PatchMapping("/me/foto")
+    public ResponseEntity<Void> salvarFotoPerfil(@RequestBody @Valid DadosFotoPerfil dados, @AuthenticationPrincipal UsuarioEntity logado) {
+        usuarioService.salvarFotoPerfil(dados, logado);
+        return ResponseEntity.noContent().build();
     }
 
     // ----------- Mudança de senha -----------
