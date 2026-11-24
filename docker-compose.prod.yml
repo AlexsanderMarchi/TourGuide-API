@@ -1,0 +1,54 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  api:                                   # este nome é o host usado no nginx.conf do front
+    image: ghcr.io/alexsandermarchi/tourguide-api:latest
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL}
+      COOKIE_SECURE: ${COOKIE_SECURE}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  front:
+    image: ghcr.io/alexsandermarchi/tourguide:latest
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+    ports:
+      - "3000:8080"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  watchtower:                            # verifica o GHCR e atualiza api e front sozinho
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_POLL_INTERVAL: 300
+      WATCHTOWER_LABEL_ENABLE: "true"
+      WATCHTOWER_CLEANUP: "true"
+      DOCKER_API_VERSION: "1.44"
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
